@@ -54,3 +54,5 @@ resource "aws_iam_policy_attachment" "ec2_s3_readonly_policy_attachment" {
 policy_arn = aws_iam_policy.s3_readonly_policy.arn
   roles      = [aws_iam_role.ec2_s3_read_only_role.name]
 }
+
+#Test

@@ -1,0 +1,83 @@
+---
+- name: Install and Enable Nginx on Localhost
+  hosts: localhost
+  become: yes
+  tasks:
+
+    - name: Install Nginx on Localhost
+      apt:
+        name: nginx
+        state: present
+    
+    - name: Start and Enable Nginx service on Localhost
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Install firewalld on Localhost
+      apt:
+        name: firewalld
+        state: present
+
+    - name: Start and Enable firewalld on Localhost
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Allow HTTPS traffic in firewalld
+      firewalld:
+        service: https
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+    - name: Restart Firewall service to apply changes
+      systemd:
+        name: firewalld
+        state: restarted
+        enabled: yes
+
+    - name: Install OpenSSL (for self-signed certificate creation)
+      apt:
+        name: openssl
+        state: present   
+
+    - name: Create SSL directory for Nginx certificates
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+        mode: '0755'    
+
+    - name: Generate SSL certificate for Nginx
+      command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Company/OU=IT/CN=localhost"
+
+    - name: Create a simple HTML website
+      copy:
+        content: "<html><body><h1>Welcome Hantt & Co - Practical Test by Sreekanth </h1></body></html>"
+        dest: /var/www/html/index.html
+
+    - name: Update Nginx config to use SSL
+      template:
+        src: nginx_default_ssl.j2
+        dest: /etc/nginx/sites-available/default
+
+    - name: Test Nginx configuration
+      command: nginx -t
+
+    - name: Restart Nginx to apply changes
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
+
+- name: Ensure Nginx is running
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Check Nginx service status
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes 

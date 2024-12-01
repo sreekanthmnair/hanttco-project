@@ -24,8 +24,8 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 # Create S3 Bucket
 resource "aws_s3_bucket" "S3_bucket" {
-  #bucket = "my-example-bucket-terraform-971422713356"  # Ensure this bucket name is globally unique
-  bucket = "my-${var.project_name}-971422713356"  # Ensure this bucket name is globally unique
+  
+  bucket = "s3-${var.project_name}-971422713356"  # Ensure this bucket name is globally unique
 
 }
 
